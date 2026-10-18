@@ -4,7 +4,7 @@ Wio Terminal をネームバッジにする。[uji/ujiwio](https://github.com/uj
 
 上面のボタンで画像を切り替える（画面に向かって左から C, B, A）。
 
-- C: X のアイコン（固定表示）
+- C: 手書きの「まさとも」アイコン（固定表示）
 - B: X の QR コード
 - A: GitHub の QR コード
 
