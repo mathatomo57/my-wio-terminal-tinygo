@@ -14,11 +14,15 @@ const (
 	A
 )
 
-var sequence = [...]Button{Up, Up, Down, Down, Left, Right, Left, Right, B, A}
+// commandButtons is the fixed command recognized by this package.
+var commandButtons = [...]Button{Up, Up, Down, Down, Left, Right, Left, Right, B, A}
 
-// prefix holds the length of the longest proper prefix that is also a suffix
-// at each position in sequence. It allows overlapping attempts to be retained.
-var prefix = [...]uint8{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}
+// fallbackMatchCounts[n-1] is how many of the n matched buttons can be reused
+// as the start of a new attempt when the next button does not match.
+// After Up, Up, the last Up can be reused as the first Up, so entry 1 is 1.
+// No other matched portion ends with a reusable start of this command.
+// This table must be updated together with commandButtons.
+var fallbackMatchCounts = [...]uint8{0, 1, 0, 0, 0, 0, 0, 0, 0, 0}
 
 // Detector tracks progress through the command. Its zero value is ready to use.
 // A Detector must not be used concurrently without external synchronization.
@@ -31,14 +35,14 @@ type Detector struct {
 // Unknown buttons interrupt the current attempt. After completion, the detector
 // is ready for another command.
 func (d *Detector) Input(button Button) bool {
-	for d.matched > 0 && button != sequence[d.matched] {
-		d.matched = prefix[d.matched-1]
+	for d.matched > 0 && button != commandButtons[d.matched] {
+		d.matched = fallbackMatchCounts[d.matched-1]
 	}
-	if button == sequence[d.matched] {
+	if button == commandButtons[d.matched] {
 		d.matched++
 	}
-	if int(d.matched) == len(sequence) {
-		d.matched = prefix[d.matched-1]
+	if int(d.matched) == len(commandButtons) {
+		d.matched = fallbackMatchCounts[d.matched-1]
 		return true
 	}
 	return false
