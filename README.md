@@ -16,6 +16,8 @@ tinygo flash -target wioterminal .
 
 ## コナミコマンド
 
+### 共通の入力判定: `cheatcode`
+
 `cheatcode` は `↑ ↑ ↓ ↓ ← → ← → B A` の入力を検出します。
 ハードウェアのドライバーには依存せず、標準 Go と TinyGo で利用できる構成です。
 
@@ -39,8 +41,40 @@ func onButtonPressed(button cheatcode.Button) {
 - 成立後は続けて次のコマンドを判定できます。途中で取り消す場合は `Reset()` を呼び出します。
 - 入力の時間制限はありません。
 
+### Wio Terminal のボタン読み取り: `cheatcode/wioterminal`
+
+Wio Terminal では、ピン設定・押下検出・チャタリング除去まで行う専用パッケージを利用できます。
+方向スイッチと既定の A/B ボタンを使用するため、入力の対応付けは不要です。
+
+```go
+package main
+
+import (
+    "time"
+
+    "github.com/masatomo57/my-wio-terminal-tinygo/cheatcode/wioterminal"
+)
+
+func main() {
+    detector := wioterminal.New()
+    for {
+        if detector.Poll() {
+            println("コマンド成立！")
+        }
+        time.Sleep(10 * time.Millisecond)
+    }
+}
+```
+
+- `Poll()` は待機せずに読み取ります。5〜10 ms 間隔を目安に呼び出してください。
+- 押下・解放をそれぞれ 20 ms 以上安定して観測すると確定します。長押しは繰り返し入力されません。
+- 複数ボタンの同時押しは入力途中のコマンドを中断します。C ボタンと方向スイッチの中央押下は無視します。
+- `Reset()` は判定途中のコマンドを取り消します。押下状態は保持するため、長押し中のボタンを再入力しません。
+- 1 台につき 1 つのインスタンスを使い、同じ goroutine から呼び出してください。
+- ハードウェアの API は `wioterminal` ビルドタグで分離され、`tinygo build -target wioterminal` で利用できます。
+
 テスト実行:
 
 ```sh
-go test ./cheatcode
+go test ./cheatcode/...
 ```
