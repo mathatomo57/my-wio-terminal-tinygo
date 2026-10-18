@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image/color"
 	"machine"
+	"runtime"
 	"time"
 
 	"github.com/masatomo57/my-wio-terminal-tinygo/cheatcode/wioterminal"
@@ -51,17 +52,30 @@ func main() {
 	display.FillScreen(black)
 	drawPNG(display, pages[0].png)
 
+	// 画像のデコードや描画中も、押下・解放を一定間隔で観測する。
+	commands := make(chan struct{}, 1)
+	go func() {
+		for {
+			if detector.Poll() {
+				commands <- struct{}{}
+			}
+			time.Sleep(5 * time.Millisecond)
+		}
+	}()
+
 	pressed := make([]bool, len(pages))
 	currentPage := 0
 	rainbow := false
 	var phase uint16
 	var lastFrame time.Time
 	for {
-		if detector.Poll() {
+		select {
+		case <-commands:
 			rainbow = !rainbow
 			if !rainbow {
 				drawPNG(display, pages[currentPage].png)
 			}
+		default:
 		}
 		for i, p := range pages {
 			down := !p.button.Get()
@@ -98,6 +112,7 @@ func drawPNG(display *ili9341.Device, b []byte) {
 		if err := display.DrawRGBBitmap(x, y, data[:w*h], w, h); err != nil {
 			fatal(err)
 		}
+		runtime.Gosched()
 	})
 	if _, err := png.Decode(bytes.NewReader(b)); err != nil {
 		fatal(err)
@@ -120,6 +135,7 @@ func drawRainbow(display *ili9341.Device, phase uint16) {
 				fatal(err)
 			}
 		}
+		runtime.Gosched()
 	}
 }
 
