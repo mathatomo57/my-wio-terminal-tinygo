@@ -3,7 +3,7 @@ package cheatcode_test
 import (
 	"testing"
 
-	"github.com/mathatomo57/my-wio-terminal-tinygo/cheatcode"
+	"github.com/masatomo57/my-wio-terminal-tinygo/cheatcode"
 )
 
 func TestInput(t *testing.T) {

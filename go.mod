@@ -1,3 +1,7 @@
-module github.com/mathatomo57/my-wio-terminal-tinygo
+module github.com/masatomo57/my-wio-terminal-tinygo
 
-go 1.22
+go 1.26.2
+
+require tinygo.org/x/drivers v0.36.0
+
+require github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
