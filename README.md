@@ -10,6 +10,11 @@ Wio Terminal をネームバッジにする。[uji/ujiwio](https://github.com/uj
 
 画像は 320x240 の 8bit RGB PNG。差し替える場合は同じ形式にする。
 
+`↑ ↑ ↓ ↓ ← → ← → B A` を入力すると、背景が動く虹色に切り替わります。
+もう一度入力すると元の背景に戻ります。虹色の間も A/B/C で画像を切り替えられます。
+各画像の左上と同じ色の画素を背景として扱うため、差し替え画像も左上を背景色にしてください。
+文字・イラスト・QR コードには背景色を使わないでください。
+
 ```sh
 tinygo flash -target wioterminal .
 ```
@@ -77,4 +82,5 @@ func main() {
 
 ```sh
 go test ./cheatcode/...
+go test rainbow.go rainbow_test.go
 ```
